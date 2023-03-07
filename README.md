@@ -1,5 +1,42 @@
 # Gary-Auten
 Code for Case Study
+Linear v. Bayesian Regression
+# Load the required packages
+library(dbplyr)
+library(rstanarm)
+
+# Read in the data
+data <- read.csv("ROS-Examples-master/toyotacorolladata.csv")
+
+
+# Select the predictor variables and outcome variable
+data <- select(data, Age, KM, Weight, HP, CC, QuartTax, Fuel_Type, Price)
+
+# Convert the Fuel_Type variable to a factor
+data$Fuel_Type <- factor(data$Fuel_Type)
+
+# Fit a linear regression model
+lm_model <- lm(Price ~ Age + KM + Weight + HP + CC + QuartTax + Fuel_Type, data = data)
+
+# Fit a Bayesian regression model without specifying family, prior_intercept, or prior_aux
+bayes_model <- stan_glm(Price ~ Age + KM + Weight + HP + CC + QuartTax + Fuel_Type, data = data)
+
+# Compute the mean standard error of the linear regression model
+lm_mse <- sqrt(mean((data$Price - predict(lm_model))^2))
+
+# Compute the mean standard error and R-squared of the Bayesian regression model
+bayes_mse <- sqrt(mean((data$Price - predict(bayes_model))^2))
+bayes_rsq <- as.numeric(cor(data$Price, predict(bayes_model))^2)
+
+# Print the results
+cat("Mean standard error of linear regression model:", lm_mse, "\n")
+cat("Mean standard error of Bayesian regression model:", bayes_mse, "\n")
+cat("R-squared of linear regression model:", summary(lm_model)$r.squared, "\n")
+cat("R-squared of Bayesian regression model:", bayes_rsq, "\n")
+
+
+
+ELPD, R2 Values
 library(rstanarm)
 data <- read.csv("ROS-Examples-master/toyotacorolladata.csv")
 model <- stan_glm(Price ~ Age + KM + QuartTax + Fuel_Type + Weight + HP + CC, data = data)
